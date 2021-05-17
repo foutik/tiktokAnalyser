@@ -1,5 +1,5 @@
 from user import User
-from pandas import pd
+import pandas as pd
 
 class Video(object):
     def __init__(self, json_dict):

@@ -5,14 +5,27 @@ from video import Videos
 
 
 class analyticsEngineTrends(object):
-    def __init__(self, seedUsers, api) -> None:
-        self.seedUsers = seedUsers
+    def __init__(self, api, seedUsers=None, nbTrendingVids = 1000) -> None:
         self.api = api
-        self.seedUsersId = [self.api.getUser(username)["userInfo"]["user"]["id"]
-                            for username in seedUsers]
+        self.seedUsers = seedUsers
+        self.trending_videos = []
 
-        self.suggested = [self.api.getSuggestedUserbyID(count=25, startingId=s_id)
-                          for s_id in self.seedUsersId]
+        if self.seedUsers:
+            seedUsersId = [self.api.getUser(username)["userInfo"]["user"]["id"]
+                           for username in seedUsers]
+            suggested = [self.api.getSuggestedUserbyID(count=25, startingId=s_id)
+                         for s_id in seedUsersId]
+
+            for user in suggested:
+                print(user)
+                userVids = api.byUsername(user, count=10)
+                temp = Videos(userVids)
+                self.videos += temp
+            
+        else:
+            temp = api.trending(count=nbTrendingVids,
+                                          custom_verifyFp="")
+            self.trending_videos = Videos(temp)
 
         return
 
@@ -26,10 +39,13 @@ def main():
     userVids = api.byUsername(username, count=n_videos)
     users = api.getUser(username)
 
-    trends = api.trending(count=100, custom_verifyFp="")
+    analysticsEngine = analyticsEngineTrends(api, nbTrendingVids=100000)
+    trending_videos = analysticsEngine.videos
 
     with open("./output/trends.json", 'w') as outfile:
-        json.dump(trends, outfile)
+        json.dump(trending_videos, outfile)
+
+    trending_videos.toDataframe().to_csv("./output/videos_trending.csv", sep=";", index=False, encoding="utf-8")
 
     with open("./output/user.json", 'w') as outfile:
         json.dump(users, outfile)
