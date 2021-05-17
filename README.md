@@ -1,4 +1,4 @@
-# Tiktok Analyser
+# Tiktok Analyser :robot:
 
 Tiktok Analyser is a solution to detect trends on tiktok and to analyse them.
 
